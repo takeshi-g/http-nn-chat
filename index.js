@@ -1,6 +1,7 @@
 "use strict";
+const { read } = require("fs");
 const http = require("http");
-const fs = require("fs");
+const pug = require("pug");
 const server = http
   .createServer((req, res) => {
     const now = new Date();
@@ -11,8 +12,33 @@ const server = http
 
     switch (req.method) {
       case "GET":
-        const rs = fs.createReadStream("./form.html");
-        rs.pipe(res);
+        console.log(req.url, req.method);
+        if (req.url === "/enquetes/yaki-shabu") {
+          res.write(
+            pug.renderFile("./form.pug", {
+              path: req.url,
+              firstItem: "焼肉",
+              secondItem: "しゃぶしゃぶ",
+            })
+          );
+        } else if (req.url === "/enquetes/rice-bread") {
+          res.write(
+            pug.renderFile("./form.pug", {
+              path: req.url,
+              firstItem: "ごはん",
+              secondItem: "パン",
+            })
+          );
+        } else if (req.url === "/enquetes/sushi-pizza") {
+          res.write(
+            pug.renderFile("./form.pug", {
+              path: req.url,
+              firstItem: "寿司",
+              secondItem: "ピザ",
+            })
+          );
+        }
+        res.end();
         break;
       case "POST":
         let rawData = "";
@@ -23,7 +49,7 @@ const server = http
           .on("end", () => {
             const answer = new URLSearchParams(rawData);
             const resStr = `${answer.get("name")}さんは${answer.get(
-              "yaki-shabu"
+              "favorite"
             )}に投票しました。`;
             console.info(`${now} / ${resStr}`);
             res.write(
